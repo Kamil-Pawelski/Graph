@@ -11,6 +11,8 @@ namespace Graf2
     {
         public uint?[,] matrix;
         private uint size;
+        private Random random = new Random();
+
         public MatrixGraph(uint size)
         {
             matrix = new uint?[size, size];
@@ -74,49 +76,72 @@ namespace Graf2
         }
 
 
-        public void GenerateConnectedGraph(uint numberOfEdge) 
+        public void GenerateConnectedGraph(uint numberOfEdge)
         {
-           
-            if(numberOfEdge - 1 < size)
+
+
+            if (numberOfEdge - 1 < size)
             {
                 Console.WriteLine("To less edge to create ");
                 return;
             }
-            List<int> points = new List<int>();
-            for(int i = 0; i < size; i++)
+            List<List<uint>> adjacencyList = new List<List<uint>>();
+
+            for (uint i = 0; i < size; i++)
             {
-                points.Add(i);
+                List<uint> neighbors = new List<uint>();
+                for (uint j = 0; j < size; j++)
+                {
+                    if (i != j)
+                    {
+                        neighbors.Add(j);
+                    }
+                }
+                adjacencyList.Add(neighbors);
             }
-            Random random = new Random();
+            List<uint> indices = new List<uint>();
+            for(uint i = 0; i < size; i++)
+            {
+                indices.Add(i);
+            }
             int from, to, wage;
             for (int i = (int)(size - 1); i >= 0; i--)
             {
                 from = random.Next(i);
-                to = points[random.Next(i)];
+                to = (int)indices[random.Next(i)];
                 while (from == to)
                 {
                     from = random.Next(i);
-                    to = points[random.Next(i)];
+                    to = (int)indices[random.Next(i)];
                 }
-                matrix[from, to] = (uint)random.Next(1000);
-                points.Remove(to);
+                matrix[from, to] = (uint)random.Next(1,1000);
+                adjacencyList[from].Remove((uint)to);
+                indices.Remove((uint)to);
+            }
+            indices = new List<uint>();
+            for (uint i = 0; i < size; i++)
+            {
+                indices.Add(i);
             }
             numberOfEdge -= size;
             
             for(int i = (int)numberOfEdge; i >= 0; i--)
             {
-                from = random.Next((int)size);
-                to = random.Next((int)size);
-                wage = random.Next(1000);
-                while ((from == to) || (matrix[from, to] != null))
-                {
-                    from = random.Next((int)size);
-                    to = random.Next((int)size);
-                }
+
+                int fromIndex = random.Next(indices.Count);
+                from = (int)indices[fromIndex];
+                int fromAdjacencyIndex = random.Next(adjacencyList[from].Count);
+                to = (int)adjacencyList[from][fromAdjacencyIndex];
+                wage = random.Next(1,1000);
 
                 matrix[from, to] = (uint)wage;
+                adjacencyList[from].RemoveAt(fromAdjacencyIndex);
+                if(adjacencyList[from].Count == 0){
+                    indices.RemoveAt(fromIndex);
+                }
             }
         }
+
     }
 
 
